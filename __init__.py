@@ -1,3 +1,11 @@
+bl_info = {
+    "name": "Quaternion Rotation Clear",
+    "author": "DANOverkill",
+    "version": (1, 0, 0),
+    "blender": (2, 80, 0),
+    "category": "Object",
+}
+
 import bpy
 
 class OBJECT_OT_convert_rotation(bpy.types.Operator):
