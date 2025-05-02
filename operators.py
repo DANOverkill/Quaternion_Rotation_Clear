@@ -13,23 +13,43 @@ class OBJECT_OT_confirm_delete_quaternions(bpy.types.Operator):
 
     def execute(self, context):
         ob = context.active_object
-        deleted_count = 0
-        
+        quaternion_channels = set()
+
+        # --- ALWAYS RUN THESE STEPS ---
+        # Convert rotation modes (this always happens)
+        for bone in ob.pose.bones:
+            if bone.rotation_mode == 'QUATERNION':
+                bone.rotation_mode = 'XYZ'
+
+        # Always remove rotation mode keyframes
         if ob.animation_data and ob.animation_data.action:
             action = ob.animation_data.action
             fcurves_to_remove = [
                 fcurve for fcurve in action.fcurves
-                if "quaternion" in fcurve.data_path 
-                and fcurve.group 
-                and fcurve.group.name in self.bone_list
+                if "rotation_mode" in fcurve.data_path
             ]
             
-            deleted_count = len(fcurves_to_remove)
             for fcurve in fcurves_to_remove:
                 action.fcurves.remove(fcurve)
 
-        context.window_manager.quaternion_channels = ""
-        self.report({'INFO'}, f"Deleted {deleted_count} quaternion keyframes")
+        # --- CONDITIONAL QUATERNION HANDLING ---
+        # Only check for quaternion keys after core operations
+        if ob.animation_data and ob.animation_data.action:
+            action = ob.animation_data.action
+            quaternion_channels = {
+                fcurve.group.name for fcurve in action.fcurves
+                if "quaternion" in fcurve.data_path and fcurve.group
+            }
+
+        if quaternion_channels:
+            wm = context.window_manager
+            wm.quaternion_channels = ','.join(quaternion_channels)
+            # Show dialog but CORE OPERATIONS ARE ALREADY DONE
+            bpy.ops.object.confirm_delete_quaternions('INVOKE_DEFAULT')
+            self.report({'INFO'}, "Core conversion done - check popup for quaternions")
+        else:
+            self.report({'INFO'}, "Rotation converted with no quaternion keys")
+        
         return {'FINISHED'}
 
     def draw(self, context):
