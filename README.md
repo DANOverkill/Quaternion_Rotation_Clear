@@ -19,9 +19,12 @@ A simple Blender addon that converts quaternion rotations to Euler XYZ and clean
 
 ## Usage
 
-1. Select an armature object
-2. In the top bar menu, go to `Scripts > Convert Quaternion to Euler`
-3. Check the Info panel (top-left corner) for conversion results
+1. Addon should apear as an extra option in a new Script menu in the main menu bar. (see image below)
+2. Select an armature object
+3. In the top bar menu, go to `Scripts > Convert Quaternion to Euler`
+4. Check the Info panel (top-left corner) for conversion results
+
+![reference image showing the bar were our addon should apear iside blender](./reference_img.jpg)
 
 **Note:** Only works with active armature objects with animation data.
 
