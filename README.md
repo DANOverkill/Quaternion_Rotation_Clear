@@ -32,7 +32,7 @@ Should work with Blender 2.80 and newer
 
 ## License
 
-[MIT License](LICENSE) - Feel free to modify and redistribute
+[MIT License](https://mit-license.org/) - Feel free to modify and redistribute
 
 ## Troubleshooting
 
