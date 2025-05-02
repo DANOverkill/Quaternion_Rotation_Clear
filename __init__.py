@@ -7,49 +7,10 @@ bl_info = {
 }
 
 import bpy
-
-class OBJECT_OT_convert_rotation(bpy.types.Operator):
-    """Convert Quaternion Rotation to Euler and Clean Keyframes"""
-    bl_idname = "object.convert_rotation"
-    bl_label = "Convert Quaternion to Euler"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        return context.active_object and context.active_object.type == 'ARMATURE'
-
-    def execute(self, context):
-        ob = context.active_object
-        quaternion_channels = set()
-
-        # Convert rotation modes
-        for bone in ob.pose.bones:
-            if bone.rotation_mode == 'QUATERNION':
-                bone.rotation_mode = 'XYZ'
-
-        # Process animation data if exists
-        if ob.animation_data and ob.animation_data.action:
-            action = ob.animation_data.action
-            fcurves_to_remove = []
-
-            # Collect fcurves to remove and quaternion channels
-            for fcurve in action.fcurves:
-                if "rotation_mode" in fcurve.data_path:
-                    fcurves_to_remove.append(fcurve)
-                elif "quaternion" in fcurve.data_path and fcurve.group:
-                    quaternion_channels.add(fcurve.group.name)
-
-            # Remove collected fcurves
-            for fcurve in fcurves_to_remove:
-                action.fcurves.remove(fcurve)
-
-        # Report results
-        if quaternion_channels:
-            self.report({'INFO'}, f"Quaternion keys found on bones: {', '.join(quaternion_channels)}")
-        else:
-            self.report({'INFO'}, "Rotation modes converted and keyframes cleaned")
-        
-        return {'FINISHED'}
+from .operators import (  # Import from operators.py
+    OBJECT_OT_convert_rotation,
+    OBJECT_OT_confirm_delete_quaternions
+)
 
 class TOPBAR_MT_scripts_menu(bpy.types.Menu):
     bl_label = "Scripts"
@@ -65,6 +26,7 @@ def menu_func(self, context):
 
 classes = (
     OBJECT_OT_convert_rotation,
+    OBJECT_OT_confirm_delete_quaternions,
     TOPBAR_MT_scripts_menu,
 )
 
@@ -72,8 +34,10 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.TOPBAR_MT_editor_menus.append(menu_func)
+    bpy.types.WindowManager.quaternion_channels = bpy.props.StringProperty()
 
 def unregister():
+    del bpy.types.WindowManager.quaternion_channels
     bpy.types.TOPBAR_MT_editor_menus.remove(menu_func)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
