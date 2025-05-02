@@ -7,10 +7,7 @@ bl_info = {
 }
 
 import bpy
-from .operators import (  # Import from operators.py
-    OBJECT_OT_convert_rotation,
-    OBJECT_OT_confirm_delete_quaternions
-)
+from .operators import OBJECT_OT_convert_rotation
 
 class TOPBAR_MT_scripts_menu(bpy.types.Menu):
     bl_label = "Scripts"
@@ -20,13 +17,11 @@ class TOPBAR_MT_scripts_menu(bpy.types.Menu):
         layout = self.layout
         layout.operator(OBJECT_OT_convert_rotation.bl_idname)
 
-# Registration
 def menu_func(self, context):
     self.layout.menu(TOPBAR_MT_scripts_menu.bl_idname)
 
 classes = (
     OBJECT_OT_convert_rotation,
-    OBJECT_OT_confirm_delete_quaternions,
     TOPBAR_MT_scripts_menu,
 )
 
@@ -34,10 +29,8 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.TOPBAR_MT_editor_menus.append(menu_func)
-    bpy.types.WindowManager.quaternion_channels = bpy.props.StringProperty()
 
 def unregister():
-    del bpy.types.WindowManager.quaternion_channels
     bpy.types.TOPBAR_MT_editor_menus.remove(menu_func)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
